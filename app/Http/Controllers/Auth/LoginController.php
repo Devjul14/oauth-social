@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Exception;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -62,9 +63,31 @@ class LoginController extends Controller
     //facebook callback  
     public function handleFacebookCallback(){
 
-        $user = Socialite::driver('facebook')->stateless()->user();
+        try {
 
-        $this->_registerorLoginUser($user);
-        return redirect()->route('home');
+            $user = Socialite::driver('facebook')->user();
+
+            $finduser = User::where('provider_id', $user->id)->first();
+
+            if ($finduser) {
+
+                Auth::login($finduser);
+
+                return redirect()->intended('home');
+            } else {
+                $newUser = User::updateOrCreate(['email' => $user->email], [
+                    'name' => $user->name,
+                    'provider_id' => $user->id,
+                    'password' => encrypt('123456dummy')
+                ]);
+
+                Auth::login($newUser);
+
+                return redirect()->intended('home');
+            }
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
+    
     }
 }
