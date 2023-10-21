@@ -57,7 +57,7 @@ class LoginController extends Controller
 
     //Facebook Login
     public function redirectToFacebook(){
-    return Socialite::driver('facebook')->stateless()->redirect();
+        return Socialite::driver('facebook')->redirect();
     }
     
     //facebook callback  
