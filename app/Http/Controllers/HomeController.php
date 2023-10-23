@@ -42,7 +42,7 @@ class HomeController extends Controller
         $postResponse = $client->get("https://graph.facebook.com/v12.0/{$pageId}/posts?access_token={$accessToken}");
 
         $posts = json_decode($postResponse->getBody())->data;
-        // dd($postResponse);
+        dd($postResponse);
 
         return view('facebook-posts', ['posts' => $posts]);
     }
