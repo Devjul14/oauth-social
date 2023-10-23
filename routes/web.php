@@ -27,3 +27,5 @@ Route::get('/login/facebook/callback', [App\Http\Controllers\Auth\LoginControlle
 
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/facebook-posts', [App\Http\Controllers\HomeController::class, 'myposts'])->name('facebook-posts');
+// Route::get('/facebook-posts', 'FacebookController@getFacebookPosts');
