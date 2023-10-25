@@ -2,32 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use Facebook\Facebook;
 use GuzzleHttp\Client;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Facebook\Exceptions\FacebookResponseException;
+use Facebook\Exceptions\FacebookSDKException;
+
+
 
 class FacebookController extends Controller
 {
     public function getFacebookPosts()
     {
-        dd('hai');
-        $appId = config('services.facebook.app_id');
-        $appSecret = config('services.facebook.app_secret');
+        // dd('hai');
 
-        // Inisialisasi HTTP client Guzzle
-        $client = new Client();
+        try {
+            $appId = config('services.facebook.client_id');
+            $appSecret = config('services.facebook.client_secret');
+            $urlRedirect = config('services.facebook.redirect');
+            $defaultSdk = config('services.facebook.default_graph_version');
+            // dd($appId);
+            $fb = new Facebook([
+                'app_id' => $appId,
+                'app_secret' => $appSecret,
+                'default_graph_version' => $defaultSdk,
+            ]);
 
-        // Lakukan permintaan untuk mendapatkan token akses dari Facebook
-        $tokenResponse = $client->get("https://graph.facebook.com/oauth/access_token?client_id={$appId}&client_secret={$appSecret}&grant_type=client_credentials");
+            $helper = $fb->getRedirectLoginHelper();
 
-        // Ambil token akses dari respons
-        $accessToken = json_decode($tokenResponse->getBody())->access_token;
+            // Jika belum terotentikasi, arahkan pengguna ke halaman otorisasi
+            if (!isset($_GET['code'])) {
+                $loginUrl = $helper->getLoginUrl(route('user_posts'), ['email', 'user_posts']);
 
-        // Gunakan token akses untuk mengambil postingan dari halaman Facebook
-        $pageId = 'your_page_id'; // Ganti dengan ID halaman Facebook Anda
-        $postResponse = $client->get("https://graph.facebook.com/v12.0/{$pageId}/posts?access_token={$accessToken}");
+                // dd($loginUrl);
+            }
 
-        $posts = json_decode($postResponse->getBody())->data;
+            // Jika pengguna sudah terotentikasi, ambil access token
+            $accessToken = $helper->getAccessToken();
+            // dd($accessToken);
+            // Pastikan access token ada sebelum melanjutkan
+            if (!isset($accessToken)) {
+                // Handle error jika access token tidak ditemukan
+                echo "Gagal mendapatkan access token";
+                exit;
+            }
 
-        return view('facebook-posts', ['posts' => $posts]);
+            $response = $fb->get('/me/posts', $accessToken);
+
+            $userPosts = $response->getGraphEdge();
+
+            return view('facebook-posts', ['userPosts' => $userPosts]);
+        } catch (FacebookResponseException $e) {
+            // Tangani kesalahan respons dari Facebook
+            echo 'Graph returned an error: ' . $e->getMessage();
+            exit;
+        } catch (FacebookSDKException $e) {
+            // Tangani kesalahan SDK Facebook
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+            exit;
+        }
+
+    
+        
     }
+
 }

@@ -17,7 +17,7 @@
                     {{ __('Hello!') }}
                 </div>
                 <div class="card-body">
-                    <p><a href="{{ url('/facebook-posts')}}">To My Posts</a></p>
+                    <p><a href="{{ url('/user_posts')}}">To My Posts</a></p>
                 </div>
             </div>
         </div>

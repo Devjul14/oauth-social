@@ -32,6 +32,7 @@ return [
      'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'default_graph_version' => env('FACEBOOK_DEFAULT_GRAPH_VERSION'),
         'redirect' => 'http://localhost:8000/login/facebook/callback',
      ],
 ];

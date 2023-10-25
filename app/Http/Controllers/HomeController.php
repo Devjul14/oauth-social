@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
 
 class HomeController extends Controller
@@ -37,6 +38,11 @@ class HomeController extends Controller
         $client = new Client();
         $tokenResponse = $client->get("https://graph.facebook.com/oauth/access_token?client_id={$appId}&client_secret={$appSecret}&grant_type=client_credentials");
         $accessToken = json_decode($tokenResponse->getBody())->access_token;
+
+        $response = Http::get("https://graph.facebook.com/v10.0/me/posts", [
+            'access_token' => $accessToken,
+        ]);
+        $data = $response->json();
 
         $pageId = '100083551549379'; // Ganti dengan ID halaman Facebook Anda
         $postResponse = $client->get("https://graph.facebook.com/v12.0/{$pageId}/posts?access_token={$accessToken}");

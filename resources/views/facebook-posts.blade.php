@@ -15,6 +15,11 @@
 
 
                 </div>
+                <div class="container">
+                    @foreach($userPosts as $post)
+                    <p>{{ $post['message'] }}</p>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
